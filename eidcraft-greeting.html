@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eid Mubarak – EidCraft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel+Decorative:wght@400;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES – EidCraft Palette
+    ============================================================ */
+    :root {
+      --cream:       #F9F3E8;
+      --beige:       #EDE0C4;
+      --sand:        #D9C49A;
+      --gold:        #C9A84C;
+      --gold-light:  #E5C97A;
+      --gold-dark:   #8B6914;
+      --green:       #4A7C59;
+      --green-light: #6BA07A;
+      --green-dark:  #2F5440;
+      --brown:       #5C3D2E;
+      --text-dark:   #2C1A0E;
+      --text-mid:    #5A3E28;
+      --text-light:  #9B7A56;
+
+      --font-display: 'Cinzel Decorative', serif;
+      --font-body:    'Cormorant Garamond', serif;
+      --font-arabic:  'Amiri', serif;
+
+      --transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--cream);
+      color: var(--text-dark);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ============================================================
+       GEOMETRIC BACKGROUND PATTERN
+    ============================================================ */
+    .geo-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-color: var(--cream);
+      background-image:
+        /* 8-pointed star grid */
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 28px,
+          rgba(201,168,76,0.07) 28px,
+          rgba(201,168,76,0.07) 29px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 28px,
+          rgba(201,168,76,0.07) 28px,
+          rgba(201,168,76,0.07) 29px
+        );
+    }
+
+    /* ============================================================
+       PARTICLES CANVAS
+    ============================================================ */
+    #particles-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       SPLASH / OPENING SCREEN
+    ============================================================ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 60% 30%, #2F5440 0%, #1A3328 60%, #0D1F18 100%);
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    #splash.hidden { opacity: 0; visibility: hidden; }
+
+    .splash-moon {
+      width: 110px;
+      height: 110px;
+      position: relative;
+      margin-bottom: 2rem;
+      animation: moonFloat 3s ease-in-out infinite;
+    }
+    .splash-moon svg { width: 100%; height: 100%; filter: drop-shadow(0 0 24px rgba(201,168,76,0.6)); }
+
+    .splash-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 7vw, 2.8rem);
+      color: var(--gold-light);
+      text-align: center;
+      letter-spacing: 0.06em;
+      animation: fadeSlideUp 1s ease 0.4s both;
+    }
+    .splash-subtitle {
+      font-family: var(--font-body);
+      font-size: clamp(0.95rem, 4vw, 1.2rem);
+      color: rgba(255,255,255,0.7);
+      margin-top: 0.6rem;
+      letter-spacing: 0.15em;
+      font-style: italic;
+      animation: fadeSlideUp 1s ease 0.7s both;
+    }
+    .splash-line {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1.4rem auto 0;
+      animation: fadeSlideUp 1s ease 1s both;
+    }
+    .splash-progress {
+      position: absolute;
+      bottom: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .splash-dots { display: flex; gap: 8px; }
+    .splash-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+    .splash-loading-text {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       MAIN WRAPPER
+    ============================================================ */
+    #main {
+      position: relative;
+      z-index: 2;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 80px;
+      opacity: 0;
+      transition: opacity 1s ease 0.2s;
+    }
+    #main.visible { opacity: 1; }
+
+    /* ============================================================
+       HERO HEADER
+    ============================================================ */
+    .hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+      position: relative;
+    }
+
+    /* Crescent + Star Hero */
+    .hero-moon-wrap {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 1.6rem;
+    }
+    .hero-moon-wrap svg {
+      width: 100%; height: 100%;
+      filter: drop-shadow(0 0 18px rgba(201,168,76,0.5));
+      animation: moonFloat 4s ease-in-out infinite;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      color: var(--gold-dark);
+      line-height: 1.2;
+      letter-spacing: 0.04em;
+    }
+    .hero-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 1.2rem auto;
+      max-width: 260px;
+    }
+    .hero-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--sand)); }
+    .hero-divider span:last-child { background: linear-gradient(90deg, var(--sand), transparent); }
+    .hero-divider-diamond {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+    .hero-arabic {
+      font-family: var(--font-arabic);
+      font-size: clamp(1.2rem, 5vw, 1.6rem);
+      color: var(--text-mid);
+      direction: rtl;
+      line-height: 1.8;
+    }
+
+    /* Decorative corner ornament */
+    .corner-ornament {
+      position: absolute;
+      width: 60px; height: 60px;
+      opacity: 0.25;
+    }
+    .corner-ornament.tl { top: 12px; left: 12px; }
+    .corner-ornament.tr { top: 12px; right: 12px; transform: scaleX(-1); }
+
+    /* ============================================================
+       RECIPIENT SECTION
+    ============================================================ */
+    .recipient-section {
+      margin: 0 20px 28px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.75), rgba(237,224,196,0.4));
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 16px;
+      padding: 24px 22px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 24px rgba(139,105,20,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .recipient-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .recipient-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 0.3rem;
+    }
+    .recipient-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 6vw, 1.9rem);
+      color: var(--green-dark);
+      letter-spacing: 0.06em;
+    }
+    .recipient-greeting {
+      margin-top: 1rem;
+      font-size: clamp(0.92rem, 3.5vw, 1.05rem);
+      line-height: 1.9;
+      color: var(--text-mid);
+      font-style: italic;
+    }
+
+    /* ============================================================
+       LANTERNS ROW
+    ============================================================ */
+    .lanterns-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 0 24px 28px;
+    }
+    .lantern {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lantern svg {
+      width: 36px; height: 60px;
+      filter: drop-shadow(0 0 8px rgba(201,168,76,0.4));
+    }
+    .lantern-string {
+      width: 1px; height: 28px;
+      background: linear-gradient(to bottom, var(--sand), transparent);
+      margin-bottom: 2px;
+      order: -1;
+    }
+    /* Staggered swing */
+    .lantern:nth-child(1) svg { animation: lanternSwing 3.2s ease-in-out infinite; }
+    .lantern:nth-child(2) svg { animation: lanternSwing 3.8s ease-in-out 0.4s infinite; }
+    .lantern:nth-child(3) svg { animation: lanternSwing 3s ease-in-out 0.8s infinite; }
+    .lantern:nth-child(4) svg { animation: lanternSwing 3.5s ease-in-out 0.2s infinite; }
+    .lantern:nth-child(5) svg { animation: lanternSwing 4s ease-in-out 0.6s infinite; }
+
+    /* ============================================================
+       REVEAL BUTTON
+    ============================================================ */
+    .btn-reveal-wrap {
+      text-align: center;
+      padding: 8px 24px 32px;
+    }
+    .btn-reveal {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      color: var(--gold-light);
+      border: none;
+      border-radius: 50px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(47,84,64,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-reveal::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-reveal:hover::after { opacity: 1; }
+    .btn-reveal:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(47,84,64,0.4); }
+    .btn-reveal:active { transform: translateY(0); }
+    .btn-icon { font-size: 1.1rem; }
+
+    /* ============================================================
+       MESSAGE CARD
+    ============================================================ */
+    .message-card {
+      margin: 0 20px 32px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(139,105,20,0.15);
+
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: max-height 0.9s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.7s ease 0.15s,
+                  transform 0.7s ease 0.15s;
+      pointer-events: none;
+    }
+    .message-card.open {
+      max-height: 900px;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .message-card-inner {
+      background: linear-gradient(160deg, #FFFDF5, #F2E8D0);
+      border: 1px solid rgba(201,168,76,0.35);
+      padding: 32px 24px 28px;
+      position: relative;
+    }
+    .message-card-inner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .msg-quran {
+      font-family: var(--font-arabic);
+      font-size: 1.4rem;
+      direction: rtl;
+      text-align: center;
+      color: var(--green-dark);
+      line-height: 2;
+      margin-bottom: 0.4rem;
+    }
+    .msg-quran-trans {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: var(--text-light);
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 1.4rem;
+      text-transform: uppercase;
+    }
+    .msg-divider { width: 60px; height: 1px; background: var(--sand); margin: 0 auto 1.4rem; }
+
+    .msg-body {
+      font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+      line-height: 1.95;
+      color: var(--text-mid);
+      text-align: center;
+      font-style: italic;
+    }
+    .msg-body strong { color: var(--green-dark); font-style: normal; font-weight: 700; }
+
+    .msg-signature {
+      margin-top: 1.6rem;
+      text-align: center;
+    }
+    .msg-signature-line { width: 80px; height: 1px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 0 auto 0.8rem; }
+    .msg-sig-name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--gold-dark);
+      letter-spacing: 0.1em;
+    }
+    .msg-sig-sub {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.2rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* Envelope-seal decoration */
+    .msg-seal {
+      text-align: center;
+      margin-top: 1.4rem;
+    }
+    .msg-seal svg { width: 40px; height: 40px; opacity: 0.4; }
+
+    /* ============================================================
+       MUSIC PLAYER
+    ============================================================ */
+    .music-bar {
+      margin: 0 20px 28px;
+      background: linear-gradient(135deg, var(--green-dark), #1e3d2c);
+      border-radius: 50px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(30,61,44,0.3);
+    }
+    .music-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.2s, background 0.2s;
+      color: var(--green-dark);
+    }
+    .music-btn:hover { transform: scale(1.1); background: var(--gold-light); }
+    .music-btn svg { width: 16px; height: 16px; }
+    .music-info { flex: 1; overflow: hidden; }
+    .music-title {
+      font-size: 0.82rem;
+      color: var(--gold-light);
+      letter-spacing: 0.1em;
+      font-family: var(--font-body);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .music-subtitle {
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.08em;
+      font-style: italic;
+      margin-top: 1px;
+    }
+    .music-wave {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 20px;
+    }
+    .music-wave span {
+      display: block;
+      width: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      animation: waveAnim 1s ease-in-out infinite;
+      opacity: 0.6;
+    }
+    .music-wave span:nth-child(1) { height: 8px;  animation-delay: 0s; }
+    .music-wave span:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+    .music-wave span:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+    .music-wave span:nth-child(4) { height: 18px; animation-delay: 0.05s; }
+    .music-wave span:nth-child(5) { height: 10px; animation-delay: 0.15s; }
+    .music-wave.paused span { animation-play-state: paused; }
+
+    /* ============================================================
+       QR INDICATOR STRIP
+    ============================================================ */
+    .qr-strip {
+      margin: 0 20px 28px;
+      background: rgba(237,224,196,0.5);
+      border: 1px dashed rgba(201,168,76,0.4);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .qr-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .qr-text { font-size: 0.78rem; line-height: 1.65; color: var(--text-light); font-style: italic; }
+    .qr-text strong { display: block; font-size: 0.82rem; color: var(--text-mid); font-style: normal; margin-bottom: 2px; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      text-align: center;
+      padding: 24px 24px 16px;
+      border-top: 1px solid rgba(201,168,76,0.2);
+      margin: 0 20px;
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--gold-dark);
+      letter-spacing: 0.1em;
+    }
+    .footer-tagline {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      font-style: italic;
+      letter-spacing: 0.08em;
+    }
+    .footer-hearts {
+      font-size: 0.85rem;
+      margin-top: 10px;
+      opacity: 0.5;
+      letter-spacing: 4px;
+    }
+
+    /* ============================================================
+       KEYFRAME ANIMATIONS
+    ============================================================ */
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    @keyframes lanternSwing {
+      0%, 100% { transform: rotate(-5deg); }
+      50%       { transform: rotate(5deg); }
+      transform-origin: top center;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes dotPulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40%            { transform: scale(1);   opacity: 1; }
+    }
+    @keyframes waveAnim {
+      0%, 100% { transform: scaleY(0.5); }
+      50%       { transform: scaleY(1); }
+    }
+    @keyframes particleFade {
+      0%   { opacity: 0; transform: translateY(0) scale(0); }
+      20%  { opacity: 1; transform: scale(1); }
+      80%  { opacity: 0.8; }
+      100% { opacity: 0; transform: translateY(-120px) scale(0.4); }
+    }
+
+    /* ============================================================
+       ENTRANCE ANIMATIONS (for sections)
+    ============================================================ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.in { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Geometric background layer -->
+  <div class="geo-bg"></div>
+
+  <!-- Particle canvas -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ============================================================
+       SPLASH / OPENING SCREEN
+  ============================================================ -->
+  <div id="splash">
+    <!-- Crescent Moon SVG -->
+    <div class="splash-moon">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Moon crescent -->
+        <path d="M70 50C70 63.8 58.8 75 45 75C31.2 75 20 63.8 20 50C20 36.2 31.2 25 45 25C38 33 38 67 70 50Z"
+              fill="#E5C97A" opacity="0.9"/>
+        <!-- Star -->
+        <polygon points="78,22 80,28 86,28 81,32 83,38 78,34 73,38 75,32 70,28 76,28"
+                 fill="#E5C97A"/>
+      </svg>
+    </div>
+
+    <h1 class="splash-title">Eid Mubarak 🌙</h1>
+    <p class="splash-subtitle">A Special Message For You</p>
+    <div class="splash-line"></div>
+
+    <div class="splash-progress">
+      <div class="splash-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="splash-loading-text">Membuka pesan…</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <div id="main">
+
+    <!-- Hero Header -->
+    <header class="hero fade-up">
+      <!-- Corner ornaments -->
+      <svg class="corner-ornament tl" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L30 2 L2 30 Z" stroke="#C9A84C" stroke-width="1" fill="none"/>
+        <path d="M2 2 L20 2 L2 20 Z" stroke="#C9A84C" stroke-width="0.5" fill="rgba(201,168,76,0.1)"/>
+        <circle cx="2" cy="2" r="2" fill="#C9A84C"/>
+        <circle cx="30" cy="2" r="1.5" fill="#C9A84C"/>
+        <circle cx="2" cy="30" r="1.5" fill="#C9A84C"/>
+      </svg>
+      <svg class="corner-ornament tr" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L30 2 L2 30 Z" stroke="#C9A84C" stroke-width="1" fill="none"/>
+        <path d="M2 2 L20 2 L2 20 Z" stroke="#C9A84C" stroke-width="0.5" fill="rgba(201,168,76,0.1)"/>
+        <circle cx="2" cy="2" r="2" fill="#C9A84C"/>
+        <circle cx="30" cy="2" r="1.5" fill="#C9A84C"/>
+        <circle cx="2" cy="30" r="1.5" fill="#C9A84C"/>
+      </svg>
+
+      <!-- Moon icon -->
+      <div class="hero-moon-wrap">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M68 50C68 62.7 57.7 73 45 73C32.3 73 22 62.7 22 50C22 37.3 32.3 27 45 27C39 35 39 65 68 50Z"
+                fill="#C9A84C"/>
+          <polygon points="75,20 77,26 83,26 78,30 80,36 75,32 70,36 72,30 67,26 73,26"
+                   fill="#C9A84C" opacity="0.8"/>
+        </svg>
+      </div>
+
+      <p class="hero-eyebrow">EidCraft Smart Hampers</p>
+      <h2 class="hero-title">Selamat Hari Raya<br>Idulfitri 1446 H</h2>
+
+      <div class="hero-divider">
+        <span></span>
+        <div class="hero-divider-diamond"></div>
+        <span></span>
+      </div>
+
+      <p class="hero-arabic">تَقَبَّلَ اللهُ مِنَّا وَمِنْكُم</p>
+    </header>
+
+    <!-- Floating Lanterns -->
+    <div class="lanterns-row fade-up">
+      <!-- Lantern 1 -->
+      <div class="lantern">
+        <div class="lantern-string"></div>
+        <svg viewBox="0 0 36 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="0" width="8" height="6" rx="2" fill="#C9A84C"/>
+          <ellipse cx="18" cy="30" rx="12" ry="20" fill="#4A7C59" opacity="0.85"/>
+          <ellipse cx="18" cy="30" rx="8" ry="16" fill="#6BA07A" opacity="0.6"/>
+          <ellipse cx="18" cy="30" rx="4" ry="10" fill="#E5C97A" opacity="0.5"/>
+          <rect x="15" y="4" width="6" height="4" rx="1" fill="#8B6914"/>
+          <ellipse cx="18" cy="50" rx="5" ry="3" fill="#C9A84C" opacity="0.5"/>
+          <line x1="18" y1="53" x2="18" y2="58" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- Lantern 2 (gold) -->
+      <div class="lantern">
+        <div class="lantern-string"></div>
+        <svg viewBox="0 0 36 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="0" width="8" height="6" rx="2" fill="#8B6914"/>
+          <ellipse cx="18" cy="30" rx="10" ry="22" fill="#C9A84C" opacity="0.85"/>
+          <ellipse cx="18" cy="30" rx="6" ry="16" fill="#E5C97A" opacity="0.65"/>
+          <ellipse cx="18" cy="30" rx="3" ry="10" fill="#FFF9E6" opacity="0.55"/>
+          <rect x="15" y="4" width="6" height="4" rx="1" fill="#5C3D2E"/>
+          <ellipse cx="18" cy="52" rx="5" ry="3" fill="#8B6914" opacity="0.6"/>
+          <line x1="18" y1="55" x2="18" y2="60" stroke="#8B6914" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- Lantern 3 (center, large) -->
+      <div class="lantern">
+        <div class="lantern-string"></div>
+        <svg viewBox="0 0 40 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="0" width="8" height="6" rx="2" fill="#C9A84C"/>
+          <ellipse cx="20" cy="33" rx="14" ry="24" fill="#2F5440" opacity="0.9"/>
+          <ellipse cx="20" cy="33" rx="9" ry="18" fill="#4A7C59" opacity="0.7"/>
+          <ellipse cx="20" cy="33" rx="5" ry="12" fill="#E5C97A" opacity="0.45"/>
+          <rect x="17" y="4" width="6" height="5" rx="1" fill="#8B6914"/>
+          <ellipse cx="20" cy="57" rx="6" ry="3.5" fill="#C9A84C" opacity="0.6"/>
+          <line x1="20" y1="60.5" x2="20" y2="64" stroke="#C9A84C" stroke-width="1.2" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- Lantern 4 -->
+      <div class="lantern">
+        <div class="lantern-string"></div>
+        <svg viewBox="0 0 36 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="0" width="8" height="6" rx="2" fill="#8B6914"/>
+          <ellipse cx="18" cy="30" rx="10" ry="22" fill="#C9A84C" opacity="0.85"/>
+          <ellipse cx="18" cy="30" rx="6" ry="16" fill="#E5C97A" opacity="0.65"/>
+          <ellipse cx="18" cy="30" rx="3" ry="10" fill="#FFF9E6" opacity="0.55"/>
+          <rect x="15" y="4" width="6" height="4" rx="1" fill="#5C3D2E"/>
+          <ellipse cx="18" cy="52" rx="5" ry="3" fill="#8B6914" opacity="0.6"/>
+          <line x1="18" y1="55" x2="18" y2="60" stroke="#8B6914" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- Lantern 5 -->
+      <div class="lantern">
+        <div class="lantern-string"></div>
+        <svg viewBox="0 0 36 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="0" width="8" height="6" rx="2" fill="#C9A84C"/>
+          <ellipse cx="18" cy="30" rx="12" ry="20" fill="#4A7C59" opacity="0.85"/>
+          <ellipse cx="18" cy="30" rx="8" ry="16" fill="#6BA07A" opacity="0.6"/>
+          <ellipse cx="18" cy="30" rx="4" ry="10" fill="#E5C97A" opacity="0.5"/>
+          <rect x="15" y="4" width="6" height="4" rx="1" fill="#8B6914"/>
+          <ellipse cx="18" cy="50" rx="5" ry="3" fill="#C9A84C" opacity="0.5"/>
+          <line x1="18" y1="53" x2="18" y2="58" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Recipient Section -->
+    <div class="recipient-section fade-up">
+      <p class="recipient-label">Untuk yang tercinta</p>
+      <!-- Change the name below as needed -->
+      <h3 class="recipient-name" id="recipient-name">✦ Aisyah ✦</h3>
+      <p class="recipient-greeting">
+        Selamat Hari Raya Idulfitri.<br>
+        Semoga hari kemenangan ini membawa kedamaian,<br>
+        keberkahan, dan kebahagiaan untukmu dan keluarga.<br><br>
+        <em>Mohon maaf lahir dan batin.</em>
+      </p>
+    </div>
+
+    <!-- Reveal Button -->
+    <div class="btn-reveal-wrap fade-up">
+      <button class="btn-reveal" id="btn-reveal">
+        <span class="btn-icon">💌</span>
+        Buka Pesan Spesial
+      </button>
+    </div>
+
+    <!-- Full Message Card -->
+    <div class="message-card" id="message-card">
+      <div class="message-card-inner">
+        <p class="msg-quran">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+        <p class="msg-quran-trans">Bismillahirrahmanirrahim</p>
+        <div class="msg-divider"></div>
+
+        <p class="msg-body">
+          Sahabatku yang tercinta,<br><br>
+          Di hari yang fitri dan penuh berkah ini,<br>
+          aku ingin mengucapkan rasa syukur<br>
+          atas kehadiranmu dalam hidupku.<br><br>
+
+          <strong>Taqabbalallahu minna wa minkum.</strong><br>
+          Semoga Allah menerima seluruh amal ibadah kita<br>
+          di bulan Ramadan yang mulia ini.<br><br>
+
+          Semoga langkahmu selalu diiringi cahaya,<br>
+          hatimu senantiasa damai,<br>
+          dan setiap doa yang kau panjatkan<br>
+          dijawab-Nya dengan penuh kasih sayang.<br><br>
+
+          Dari lubuk hati yang paling dalam,<br>
+          <em>mohon maaf atas segala khilaf dan salah,<br>
+          baik yang disengaja maupun yang tidak.</em><br><br>
+
+          Selamat merayakan kemenangan. 🌙
+        </p>
+
+        <div class="msg-signature">
+          <div class="msg-signature-line"></div>
+          <p class="msg-sig-name">Dengan Cinta & Doa</p>
+          <p class="msg-sig-sub">Dikirim lewat EidCraft Smart Hampers</p>
+        </div>
+
+        <!-- Decorative seal -->
+        <div class="msg-seal">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" stroke="#C9A84C" stroke-width="1"/>
+            <circle cx="20" cy="20" r="14" stroke="#C9A84C" stroke-width="0.5"/>
+            <path d="M20 8 L22 14 L28 14 L23 18 L25 24 L20 20 L15 24 L17 18 L12 14 L18 14 Z" fill="#C9A84C"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music Player -->
+    <div class="music-bar fade-up">
+      <button class="music-btn" id="music-btn" aria-label="Play/Pause music">
+        <!-- Play icon (default) -->
+        <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <!-- Pause icon (hidden) -->
+        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <div class="music-info">
+        <p class="music-title">Instrumental Ramadan ♩</p>
+        <p class="music-subtitle">Lagu latar suasana Eid</p>
+      </div>
+      <div class="music-wave paused" id="music-wave">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- QR Indicator Strip -->
+    <div class="qr-strip fade-up">
+      <span class="qr-icon">📲</span>
+      <p class="qr-text">
+        <strong>EidCraft Digital Card</strong>
+        Kartu ini adalah ucapan digital dari hampers EidCraft.
+        Scan QR untuk membuka pesan spesial yang telah disiapkan
+        khusus untukmu dengan penuh kasih sayang.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer fade-up">
+      <p class="footer-brand">✦ EidCraft ✦</p>
+      <p class="footer-tagline">Sent with love through EidCraft Smart Hampers</p>
+      <p class="footer-hearts">❤ ❤ ❤</p>
+    </footer>
+
+  </div><!-- /#main -->
+
+  <!-- Hidden audio element (uses a public-domain ambient tone) -->
+  <audio id="bgmusic" loop>
+    <!--
+      NOTE: Replace the src below with a valid hosted audio URL.
+      e.g. src="https://your-cdn.com/ramadan-ambient.mp3"
+      The Web Audio API fallback below generates a soft ambient tone
+      if no external file is provided.
+    -->
+  </audio>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+    /* ============================================================
+       1. SPLASH SCREEN TIMER
+    ============================================================ */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        const main   = document.getElementById('main');
+
+        splash.classList.add('hidden');
+        main.classList.add('visible');
+
+        // Trigger fade-up animations with stagger
+        const fadeEls = document.querySelectorAll('.fade-up');
+        fadeEls.forEach((el, i) => {
+          setTimeout(() => el.classList.add('in'), i * 140);
+        });
+      }, 2600); // 2.6 s splash
+    });
+
+    /* ============================================================
+       2. REVEAL BUTTON – MESSAGE CARD
+    ============================================================ */
+    const btnReveal = document.getElementById('btn-reveal');
+    const msgCard   = document.getElementById('message-card');
+    let msgOpen = false;
+
+    btnReveal.addEventListener('click', () => {
+      msgOpen = !msgOpen;
+      if (msgOpen) {
+        msgCard.classList.add('open');
+        btnReveal.innerHTML = '<span class="btn-icon">✉️</span> Pesan Terbuka';
+        btnReveal.style.background = 'linear-gradient(135deg, #8B6914, #C9A84C)';
+        // Smooth scroll into view after brief delay
+        setTimeout(() => msgCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      } else {
+        msgCard.classList.remove('open');
+        btnReveal.innerHTML = '<span class="btn-icon">💌</span> Buka Pesan Spesial';
+        btnReveal.style.background = '';
+      }
+    });
+
+    /* ============================================================
+       3. AUDIO – WEB AUDIO API ambient fallback
+    ============================================================ */
+    let audioCtx = null;
+    let gainNode = null;
+    let oscillators = [];
+    let musicPlaying = false;
+
+    const musicBtn   = document.getElementById('music-btn');
+    const iconPlay   = document.getElementById('icon-play');
+    const iconPause  = document.getElementById('icon-pause');
+    const musicWave  = document.getElementById('music-wave');
+    const bgMusic    = document.getElementById('bgmusic');
+
+    /** Build a gentle ambient drone using the Web Audio API */
+    function buildAmbient() {
+      if (audioCtx) return; // already built
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.connect(audioCtx.destination);
+
+      // Soft chord: root, fifth, octave, major third (a gentle tonic chord)
+      const freqs = [130.81, 196.00, 261.63, 329.63, 392.00]; // C3, G3, C4, E4, G4
+      freqs.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.value = freq;
+        oscGain.gain.value = 0.06 - i * 0.008; // gentle fade-off per harmonic
+        osc.connect(oscGain);
+        oscGain.connect(gainNode);
+        osc.start();
+        oscillators.push(osc);
+      });
+    }
+
+    function startAudio() {
+      buildAmbient();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      gainNode.gain.linearRampToValueAtTime(0.55, audioCtx.currentTime + 1.5);
+      musicPlaying = true;
+      iconPlay.style.display  = 'none';
+      iconPause.style.display = 'block';
+      musicWave.classList.remove('paused');
+    }
+
+    function stopAudio() {
+      if (!audioCtx) return;
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+      setTimeout(() => audioCtx.suspend(), 900);
+      musicPlaying = false;
+      iconPlay.style.display  = 'block';
+      iconPause.style.display = 'none';
+      musicWave.classList.add('paused');
+    }
+
+    musicBtn.addEventListener('click', () => {
+      musicPlaying ? stopAudio() : startAudio();
+    });
+
+    /* ============================================================
+       4. PARTICLE SYSTEM (glowing gold sparks)
+    ============================================================ */
+    const canvas = document.getElementById('particles-canvas');
+    const ctx    = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x    = Math.random() * canvas.width;
+        this.y    = canvas.height + 10;
+        this.size = Math.random() * 3 + 1;
+        this.speedY = -(Math.random() * 0.6 + 0.2);
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.life   = 0;
+        this.maxLife = Math.random() * 200 + 120;
+        // Gold or pale green hue
+        const hues = [42, 48, 140, 145];
+        this.hue = hues[Math.floor(Math.random() * hues.length)];
+        this.sat = Math.random() * 30 + 60;
+        this.lit = Math.random() * 20 + 60;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.life++;
+        if (this.life > this.maxLife) this.reset();
+      }
+      draw() {
+        const progress = this.life / this.maxLife;
+        const alpha = progress < 0.2
+          ? progress / 0.2
+          : progress > 0.8
+            ? (1 - progress) / 0.2
+            : 1;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, ${this.sat}%, ${this.lit}%, ${alpha * 0.6})`;
+        ctx.fill();
+      }
+    }
+
+    // Spawn particles after splash ends
+    setTimeout(() => {
+      for (let i = 0; i < 55; i++) {
+        const p = new Particle();
+        p.life = Math.random() * p.maxLife; // randomise start phase
+        particles.push(p);
+      }
+      animateParticles();
+    }, 2800);
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+
+    /* ============================================================
+       5. SCROLL-TRIGGERED FADE-UPS (for elements below the fold)
+    ============================================================ */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) e.target.classList.add('in');
+        });
+      },
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    /* ============================================================
+       6. LANTERN SWING via CSS (handled in CSS animation)
+         Extra: subtle glow pulse on lanterns
+    ============================================================ */
+    // Nothing extra needed – CSS handles it.
+
+    /* ============================================================
+       7. PERSONALISATION HELPER
+         To change the recipient's name, update the URL param:
+         e.g. yourpage.html?to=Ahmad
+    ============================================================ */
+    (function personalise() {
+      const params = new URLSearchParams(window.location.search);
+      const name   = params.get('to');
+      if (name) {
+        document.getElementById('recipient-name').textContent = `✦ ${decodeURIComponent(name)} ✦`;
+      }
+    })();
+  </script>
+
+</body>
+</html>
